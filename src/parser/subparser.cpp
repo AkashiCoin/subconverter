@@ -61,6 +61,31 @@ void vmessConstruct(Proxy &node, const std::string &group, const std::string &re
     node.TLSSecure = tls == "tls";
 }
 
+void vlessConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &add, const std::string &port, const std::string &type, const std::string &id, const std::string &aid, const std::string &net, const std::string &cipher, const std::string &path, const std::string &host, const std::string &edge, const std::string &tls, const std::string &sni, tribool udp, tribool tfo, tribool scv, tribool tls13)
+{
+    commonConstruct(node, ProxyType::VMess, group, remarks, add, port, udp, tfo, scv, tls13);
+    node.UserId = id.empty() ? "00000000-0000-0000-0000-000000000000" : id;
+    node.AlterId = to_int(aid);
+    node.EncryptMethod = cipher;
+    node.TransferProtocol = net.empty() ? "tcp" : net;
+    node.Edge = edge;
+    node.ServerName = sni;
+
+    if(net == "quic")
+    {
+        node.QUICSecure = host;
+        node.QUICSecret = path;
+    }
+    else
+    {
+        node.Host = (host.empty() && !isIPv4(add) && !isIPv6(add)) ? add.data() : trim(host);
+        node.Path = path.empty() ? "/" : trim(path);
+    }
+    node.FakeType = type;
+    node.TLSSecure = tls == "tls";
+    node.XTLSSecure = tls == "xtls";
+}
+
 void ssrConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &protocol, const std::string &method, const std::string &obfs, const std::string &password, const std::string &obfsparam, const std::string &protoparam, tribool udp, tribool tfo, tribool scv)
 {
     commonConstruct(node, ProxyType::ShadowsocksR, group, remarks, server, port, udp, tfo, scv, tribool());
@@ -1197,6 +1222,64 @@ void explodeStdVMess(std::string vmess, Proxy &node)
     return;
 }
 
+void explodeVless(std::string vless, Proxy &node)
+{
+    std::string add, port, type, id, flow, net, path, host, tls, remarks, sni;
+    std::string addition;
+    vless = vless.substr(8);
+    string_size pos;
+
+    pos = vless.rfind("#");
+    if(pos != vless.npos)
+    {
+        remarks = urlDecode(vless.substr(pos + 1));
+        vless.erase(pos);
+    }
+    pos = vless.find("?");
+    if(pos != vless.npos)
+    {
+        addition = vless.substr(pos + 1);
+        vless.erase(pos);
+    }
+
+    if(regGetMatch(vless, "(.*?)@(.*):(.*)", 4, 0, &id, &add, &port))
+        return;
+    if(port == "0")
+        return;
+
+
+    net = getUrlArg(addition, "type");
+    flow = getUrlArg(addition, "flow");
+    tls = getUrlArg(addition, "security");
+    sni = getUrlArg(addition, "sni");
+    switch(hash_(net))
+    {
+    case "tcp"_hash:
+    case "kcp"_hash:
+        type = getUrlArg(addition, "headerType");
+        path = getUrlArg(addition, "seed");
+        break;
+    case "http"_hash:
+    case "ws"_hash:
+        host = getUrlArg(addition, "host");
+        path = getUrlArg(addition, "path");
+        break;
+    case "quic"_hash:
+        type = getUrlArg(addition, "headerType");
+        host = getUrlArg(addition, "quicSecurity");
+        path = getUrlArg(addition, "key");
+        break;
+    default:
+        return;
+    }
+
+    if(remarks.empty())
+        remarks = add + ":" + port;
+
+    vlessConstruct(node, V2RAY_DEFAULT_GROUP, remarks, add, port, type, id, flow, net, "none", path, host, "", tls, sni);
+    return;
+}
+
 void explodeShadowrocket(std::string rocket, Proxy &node)
 {
     std::string add, port, type, id, aid, net = "tcp", path, host, tls, cipher, remarks;
@@ -2069,6 +2152,8 @@ void explode(const std::string &link, Proxy &node)
         explodeSSR(link, node);
     else if(strFind(link, "vmess://") || strFind(link, "vmess1://"))
         explodeVmess(link, node);
+    else if(strFind(link, "vless://"))
+        explodeVless(link, node);
     else if(strFind(link, "ss://"))
         explodeSS(link, node);
     else if(strFind(link, "socks://") || strFind(link, "https://t.me/socks") || strFind(link, "tg://socks"))
