@@ -85,6 +85,9 @@ struct Proxy
     String QUICSecure;
     String QUICSecret;
 
+    String Up;
+    String Down;
+
     tribool UDP;
     tribool TCPFastOpen;
     tribool AllowInsecure;

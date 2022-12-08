@@ -281,6 +281,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                     singleproxy["plugin-opts"]["skip-cert-verify"] = scv.get();
                 break;
             }
+            writeLog(0, std::string("Clash Proxy type: ss"), LOG_LEVEL_INFO);
             break;
         case ProxyType::VMess:
             singleproxy["type"] = "vmess";
@@ -338,6 +339,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             default:
                 continue;
             }
+            writeLog(0, std::string("Clash Proxy type: vmess"), LOG_LEVEL_INFO);
             break;
         case ProxyType::VLess:
             singleproxy["type"] = "vless";
@@ -399,6 +401,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             default:
                 continue;
             }
+            writeLog(0, std::string("Clash Proxy type: vless"), LOG_LEVEL_INFO);
             break;
         case ProxyType::ShadowsocksR:
             //ignoring all nodes with unsupported obfs, protocols and encryption
@@ -429,6 +432,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                 singleproxy["protocol-param"] = x.ProtocolParam;
                 singleproxy["obfs-param"] = x.OBFSParam;
             }
+            writeLog(0, std::string("Clash Proxy type: ssr"), LOG_LEVEL_INFO);
             break;
         case ProxyType::SOCKS5:
             singleproxy["type"] = "socks5";
@@ -442,6 +446,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             }
             if(!scv.is_undef())
                 singleproxy["skip-cert-verify"] = scv.get();
+            writeLog(0, std::string("Clash Proxy type: socks5"), LOG_LEVEL_INFO);
             break;
         case ProxyType::HTTP:
         case ProxyType::HTTPS:
@@ -457,6 +462,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             singleproxy["tls"] = x.TLSSecure;
             if(!scv.is_undef())
                 singleproxy["skip-cert-verify"] = scv.get();
+            writeLog(0, std::string("Clash Proxy type: http"), LOG_LEVEL_INFO);
             break;
         case ProxyType::Trojan:
             singleproxy["type"] = "trojan";
@@ -483,6 +489,24 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                     singleproxy["ws-opts"]["headers"]["Host"] = x.Host;
                 break;
             }
+            writeLog(0, std::string("Clash Proxy type: trojan"), LOG_LEVEL_INFO);
+            break;
+        case ProxyType::Hysteria:
+            singleproxy["type"] = "hysteria";
+            singleproxy["protocol"] = x.Protocol;
+            singleproxy["alpn"] = x.Edge;
+            singleproxy["up"] = x.Up;
+            singleproxy["down"] = x.Down;
+            singleproxy["disable_mtu_discovery"] = true;
+            if(!x.Host.empty())
+                singleproxy["sni"] = x.Host;
+            if(!x.OBFS.empty())
+                singleproxy["obfs"] = x.OBFS;
+            if(!x.Password.empty())
+                singleproxy["auth_str"] = x.Password;
+            if(!scv.is_undef())
+                singleproxy["skip-cert-verify"] = scv.get();
+            writeLog(0, std::string("Clash Proxy type: hysteria"), LOG_LEVEL_INFO);
             break;
         case ProxyType::Snell:
             singleproxy["type"] = "snell";
@@ -497,6 +521,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             }
             if(std::all_of(x.Password.begin(), x.Password.end(), ::isdigit) && !x.Password.empty())
                 singleproxy["password"].SetTag("str");
+            writeLog(0, std::string("Clash Proxy type: snell"), LOG_LEVEL_INFO);
             break;
         default:
             continue;

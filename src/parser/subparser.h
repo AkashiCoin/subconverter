@@ -27,12 +27,14 @@ void ssConstruct(Proxy &node, const std::string &group, const std::string &remar
 void socksConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &username, const std::string &password, tribool udp = tribool(), tribool tfo = tribool(), tribool scv = tribool());
 void httpConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &username, const std::string &password, bool tls, tribool tfo = tribool(), tribool scv = tribool(), tribool tls13 = tribool());
 void trojanConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &password, const std::string &network, const std::string &host, const std::string &path, bool tlssecure, tribool udp = tribool(), tribool tfo = tribool(), tribool scv = tribool(), tribool tls13 = tribool());
+void hysteriaConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &auth_str, const std::string &obfs, const std::string &protocol, const std::string &alpn, const std::string &sni, const std::string &up, const std::string &down, tribool udp = tribool(), tribool tfo = tribool(), tribool scv = tribool(), tribool tls13 = tribool());
 void snellConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &password, const std::string &obfs, const std::string &host, uint16_t version = 0, tribool udp = tribool(), tribool tfo = tribool(), tribool scv = tribool());
 void explodeVmess(std::string vmess, Proxy &node);
 void explodeVless(std::string vmess, Proxy &node);
 void explodeSSR(std::string ssr, Proxy &node);
 void explodeSS(std::string ss, Proxy &node);
 void explodeTrojan(std::string trojan, Proxy &node);
+void explodeHysteria(std::string trojan, Proxy &node);
 void explodeQuan(const std::string &quan, Proxy &node);
 void explodeStdVMess(std::string vmess, Proxy &node);
 void explodeShadowrocket(std::string kit, Proxy &node);

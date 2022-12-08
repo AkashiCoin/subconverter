@@ -63,7 +63,7 @@ void vmessConstruct(Proxy &node, const std::string &group, const std::string &re
 
 void vlessConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &add, const std::string &port, const std::string &type, const std::string &id, const std::string &aid, const std::string &net, const std::string &cipher, const std::string &path, const std::string &host, const std::string &edge, const std::string &tls, const std::string &sni, tribool udp, tribool tfo, tribool scv, tribool tls13)
 {
-    commonConstruct(node, ProxyType::VMess, group, remarks, add, port, udp, tfo, scv, tls13);
+    commonConstruct(node, ProxyType::VLess, group, remarks, add, port, udp, tfo, scv, tls13);
     node.UserId = id.empty() ? "00000000-0000-0000-0000-000000000000" : id;
     node.AlterId = to_int(aid);
     node.EncryptMethod = cipher;
@@ -129,6 +129,18 @@ void trojanConstruct(Proxy &node, const std::string &group, const std::string &r
     node.TLSSecure = tlssecure;
     node.TransferProtocol = network.empty() ? "tcp" : network;
     node.Path = path;
+}
+
+void hysteriaConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &auth_str, const std::string &obfs, const std::string &protocol, const std::string &alpn, const std::string &sni, const std::string &up, const std::string &down, tribool udp, tribool tfo, tribool scv, tribool tls13)
+{
+    commonConstruct(node, ProxyType::Hysteria, group, remarks, server, port, udp, tfo, scv, tls13);
+    node.Password = auth_str;
+    node.Host = sni;
+    node.Edge = alpn;
+    node.OBFS = obfs;
+    node.Up = up;
+    node.Down = down;
+    node.Protocol = protocol;
 }
 
 void snellConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &password, const std::string &obfs, const std::string &host, uint16_t version, tribool udp, tribool tfo, tribool scv)
@@ -774,12 +786,18 @@ void explodeTrojan(std::string trojan, Proxy &node)
 
     host = getUrlArg(addition, "sni");
     if(host.empty())
+        host = getUrlArg(addition, "host");
+    if(host.empty())
         host = getUrlArg(addition, "peer");
     tfo = getUrlArg(addition, "tfo");
     scv = getUrlArg(addition, "allowInsecure");
     group = urlDecode(getUrlArg(addition, "group"));
-
-    if(getUrlArg(addition, "ws") == "1")
+    if(getUrlArg(addition, "type") == "ws")
+    {
+        path = getUrlArg(addition, "path");
+        network = "ws";
+    }
+    else if(getUrlArg(addition, "ws") == "1")
     {
         path = getUrlArg(addition, "wspath");
         network = "ws";
@@ -1277,6 +1295,49 @@ void explodeVless(std::string vless, Proxy &node)
         remarks = add + ":" + port;
 
     vlessConstruct(node, V2RAY_DEFAULT_GROUP, remarks, add, port, type, id, flow, net, "none", path, host, "", tls, sni);
+    return;
+}
+
+void explodeHysteria(std::string hysteria, Proxy &node)
+{
+    std::string add, port, auth_str, obfs, protocol, insecure, alpn, remarks, sni, downmbps, upmbps;
+    std::string addition;
+    tribool udp, tfo, scv;
+    hysteria = hysteria.substr(11);
+    string_size pos;
+
+    pos = hysteria.rfind("#");
+    if(pos != hysteria.npos)
+    {
+        remarks = urlDecode(hysteria.substr(pos + 1));
+        hysteria.erase(pos);
+    }
+    pos = hysteria.find("?");
+    if(pos != hysteria.npos)
+    {
+        addition = hysteria.substr(pos + 1);
+        hysteria.erase(pos);
+    }
+
+    if(regGetMatch(hysteria, "(.*):(.*)", 3, 0, &add, &port))
+        return;
+    if(port == "0")
+        return;
+
+
+    protocol = getUrlArg(addition, "protocol");
+    scv = getUrlArg(addition, "insecure") == "1";
+    sni = getUrlArg(addition, "peer");
+    auth_str = getUrlArg(addition, "auth");
+    obfs = getUrlArg(addition, "obfs");
+    alpn = getUrlArg(addition, "alpn");
+    upmbps = getUrlArg(addition, "upmbps");
+    downmbps = getUrlArg(addition, "downmbps");
+
+    if(remarks.empty())
+        remarks = add + ":" + port;
+
+    hysteriaConstruct(node, HYSTERIA_DEFAULT_GROUP, remarks, add, port, auth_str, obfs, protocol, alpn, sni, upmbps, downmbps, udp, tfo, scv);
     return;
 }
 
@@ -2163,6 +2224,8 @@ void explode(const std::string &link, Proxy &node)
     else if(strFind(link, "Netch://"))
         explodeNetch(link, node);
     else if(strFind(link, "trojan://"))
+        explodeTrojan(link, node);
+    else if(strFind(link, "hysteria://"))
         explodeTrojan(link, node);
     else if(isLink(link))
         explodeHTTPSub(link, node);
