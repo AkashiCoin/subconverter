@@ -116,7 +116,7 @@ bool applyMatcher(const std::string &rule, std::string &real_rule, const Proxy &
     std::string target, ret_real_rule;
     static const std::string groupid_regex = R"(^!!(?:GROUPID|INSERT)=([\d\-+!,]+)(?:!!(.*))?$)", group_regex = R"(^!!(?:GROUP)=(.+?)(?:!!(.*))?$)";
     static const std::string type_regex = R"(^!!(?:TYPE)=(.+?)(?:!!(.*))?$)", port_regex = R"(^!!(?:PORT)=(.+?)(?:!!(.*))?$)", server_regex = R"(^!!(?:SERVER)=(.+?)(?:!!(.*))?$)";
-    static const string_array types = {"", "SS", "SSR", "VMESS", "TROJAN", "SNELL", "HTTP", "HTTPS", "SOCKS5"};
+    static const string_array types = {"", "SS", "SSR", "VMESS", "VLESS", "TROJAN", "HYSTERIA", "SNELL", "HTTP", "HTTPS", "SOCKS5"};
     if(startsWith(rule, "!!GROUP="))
     {
         regGetMatch(rule, group_regex, 3, 0, &target, &ret_real_rule);
