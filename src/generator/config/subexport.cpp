@@ -345,22 +345,21 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             singleproxy["type"] = "vless";
             singleproxy["uuid"] = x.UserId;
             singleproxy["cipher"] = x.EncryptMethod;
+            singleproxy["network"] = x.TransferProtocol;
             singleproxy["tls"] = x.TLSSecure;
             if(!scv.is_undef())
                 singleproxy["skip-cert-verify"] = scv.get();
             if(!x.ServerName.empty())
                 singleproxy["servername"] = x.ServerName;
-            if(!x.Flow.empty())
-                singleproxy["flow"] = x.Flow;
-            else if(x.XTLSSecure) 
-                singleproxy["flow"] = "xtls-rprx-direct";
             switch(hash_(x.TransferProtocol))
             {
             case "tcp"_hash:
-                singleproxy["network"] = x.TransferProtocol;
+                if(!x.Flow.empty())
+                    singleproxy["flow"] = x.Flow;
+                else if(x.XTLSSecure) 
+                    singleproxy["flow"] = "xtls-rprx-direct";
                 break;
             case "ws"_hash:
-                singleproxy["network"] = x.TransferProtocol;
                 if(ext.clash_new_field_name)
                 {
                     singleproxy["ws-opts"]["path"] = x.Path;
@@ -379,7 +378,6 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                 }
                 break;
             case "http"_hash:
-                singleproxy["network"] = x.TransferProtocol;
                 singleproxy["http-opts"]["method"] = "GET";
                 singleproxy["http-opts"]["path"].push_back(x.Path);
                 if(!x.Host.empty())
@@ -388,13 +386,11 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                     singleproxy["http-opts"]["headers"]["Edge"].push_back(x.Edge);
                 break;
             case "h2"_hash:
-                singleproxy["network"] = x.TransferProtocol;
                 singleproxy["h2-opts"]["path"] = x.Path;
                 if(!x.Host.empty())
                     singleproxy["h2-opts"]["host"].push_back(x.Host);
                 break;
             case "grpc"_hash:
-                singleproxy["network"] = x.TransferProtocol;
                 singleproxy["servername"] = x.Host;
                 singleproxy["grpc-opts"]["grpc-service-name"] = x.Path;
                 break;
@@ -494,7 +490,8 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
         case ProxyType::Hysteria:
             singleproxy["type"] = "hysteria";
             singleproxy["protocol"] = x.Protocol;
-            singleproxy["alpn"] = x.Edge;
+            if (!x.Edge.empty())
+                singleproxy["alpn"].push_back(x.Edge);
             singleproxy["up"] = x.Up;
             singleproxy["down"] = x.Down;
             singleproxy["disable_mtu_discovery"] = true;
