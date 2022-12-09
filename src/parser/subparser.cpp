@@ -2226,7 +2226,7 @@ void explode(const std::string &link, Proxy &node)
     else if(strFind(link, "trojan://"))
         explodeTrojan(link, node);
     else if(strFind(link, "hysteria://"))
-        explodeTrojan(link, node);
+        explodeHysteria(link, node);
     else if(isLink(link))
         explodeHTTPSub(link, node);
 }

@@ -74,6 +74,7 @@ enum
 #define SOCKS_DEFAULT_GROUP "SocksProvider"
 #define HTTP_DEFAULT_GROUP "HTTPProvider"
 #define TROJAN_DEFAULT_GROUP "TrojanProvider"
+#define HYSTERIA_DEFAULT_GROUP "HysteriaProvider"
 #define SNELL_DEFAULT_GROUP "SnellProvider"
 
 void printMsg(int index, nodeInfo &node, bool rpcmode);

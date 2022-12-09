@@ -524,6 +524,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             writeLog(0, std::string("Clash Proxy type: snell"), LOG_LEVEL_INFO);
             break;
         default:
+            writeLog(0, std::string("Clash Proxy type: Unknow"), LOG_LEVEL_INFO);
             continue;
         }
 

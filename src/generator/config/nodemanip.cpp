@@ -226,6 +226,7 @@ int addNodes(std::string link, std::vector<Proxy> &allNodes, int groupID, parse_
         if(custom_group.size())
             node.Group = custom_group;
         allNodes.emplace_back(std::move(node));
+        writeLog(LOG_TYPE_INFO, "Add a node successful.");
     }
     return 0;
 }
